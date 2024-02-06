@@ -1,16 +1,20 @@
-import { StyleSheet } from "react-native";
+import { Button, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
+import { useNavigation } from "expo-router";
 
 export default function TabLevels() {
+  const router = useNavigation();
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
+      <Text style={styles.title}>Levels</Text>
       <View
         style={styles.separator}
         lightColor="#eee"
         darkColor="rgba(255,255,255,0.1)"
       />
+      {/* Temporary way to go to level view */}
+      <Button title="Start!" onPress={() => router.navigate("level")} />
     </View>
   );
 }
