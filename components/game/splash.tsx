@@ -3,6 +3,9 @@ import { Canvas, MeshProps, useFrame } from "@react-three/fiber";
 import { StyleSheet, View } from "react-native";
 import { Center, SoftShadows, Text3D } from "@react-three/drei";
 import InterBoldFontData from "../../assets/fonts/interBold.json";
+import Colors from "@/constants/Colors";
+
+const SplashBGColor = Colors["light"].splashBackground;
 
 function SpinningBox(props: MeshProps) {
   // This reference will give us direct access to the mesh
@@ -110,7 +113,7 @@ const Splashscreen = () => {
           receiveShadow
         >
           <planeGeometry attach="geometry" args={[10, 10]} />
-          <meshStandardMaterial attach="material" color="#ffb6c1" />
+          <meshStandardMaterial attach="material" color={SplashBGColor} />
         </mesh>
       </Canvas>
     </View>

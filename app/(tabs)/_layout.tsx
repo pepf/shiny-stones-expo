@@ -21,6 +21,10 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        tabBarStyle: {
+          backgroundColor: "#ffe9ec",
+          borderWidth: 0,
+        },
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
@@ -32,7 +36,7 @@ export default function TabLayout() {
         options={{
           title: "Welcome",
           headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="rocket" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>
