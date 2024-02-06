@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { Canvas, MeshProps, useFrame } from "@react-three/fiber";
 import { StyleSheet, View } from "react-native";
-import { SoftShadows } from "@react-three/drei";
+import { Center, SoftShadows, Text3D } from "@react-three/drei";
+import InterBoldFontData from "../../assets/fonts/interBold.json";
 
 function SpinningBox(props: MeshProps) {
   // This reference will give us direct access to the mesh
@@ -29,25 +30,55 @@ function SpinningBox(props: MeshProps) {
     >
       <boxGeometry attach="geometry" args={[1, 1, 1]} />
       <meshLambertMaterial
-        metalness={0.1}
-        reflectivity={0}
+        reflectivity={0.1}
         attach="material"
-        color={hovered ? "hotpink" : "skyblue"}
+        color={hovered ? "hotpink" : "#ffd0b6"}
       />
     </mesh>
   );
 }
 
-const GameCanvas = () => {
+function Logo() {
+  const mesh = useRef<MeshProps>();
+
+  useFrame((state, delta) => {
+    if (mesh && mesh.current) {
+      // console.log({ delta, state });
+      mesh.current.rotation.y = 0.25 * Math.sin(state.clock.getElapsedTime());
+    }
+  });
+
+  return (
+    <Center ref={mesh} rotation={[-0.25, -0.33, 0]}>
+      <Text3D
+        receiveShadow
+        curveSegments={32}
+        bevelEnabled
+        bevelSize={0.04}
+        bevelThickness={0.1}
+        height={0.5}
+        lineHeight={0.5}
+        letterSpacing={-0.06}
+        size={0.75}
+        font={InterBoldFontData}
+      >
+        {`shiny\nstones`}
+        <meshLambertMaterial color="#ffb6e6" reflectivity={0.1} />
+      </Text3D>
+    </Center>
+  );
+}
+
+const Splashscreen = () => {
   return (
     <View style={styles.container}>
       <Canvas shadows>
         <SoftShadows size={25} samples={10} />
-        <color attach="background" args={["#f0f0f0"]} />
-        <ambientLight intensity={0.05} />
+        <color attach="background" args={["#ffb6c1"]} />
+        <ambientLight intensity={0.2} />
         <directionalLight
           castShadow
-          position={[0, 10, 2]}
+          position={[0, 10, 4]}
           intensity={1}
           shadow-mapSize={1024}
         >
@@ -58,8 +89,10 @@ const GameCanvas = () => {
         </directionalLight>
 
         {/* <pointLight color="darkblue" position={[10, 10, 10]} /> */}
-        <SpinningBox position={[-1.2, 0, 0]} castShadow />
-        <SpinningBox position={[1.2, 0, 0]} castShadow />
+        <SpinningBox position={[-1.2, 2, -1]} castShadow />
+        <SpinningBox position={[1.2, -2, 0]} castShadow />
+
+        <Logo />
 
         <mesh
           position-y={-2}
@@ -77,7 +110,7 @@ const GameCanvas = () => {
           receiveShadow
         >
           <planeGeometry attach="geometry" args={[10, 10]} />
-          <meshStandardMaterial attach="material" color="grey" />
+          <meshStandardMaterial attach="material" color="#ffb6c1" />
         </mesh>
       </Canvas>
     </View>
@@ -93,4 +126,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GameCanvas;
+export default Splashscreen;

@@ -1,12 +1,12 @@
 import { StyleSheet } from "react-native";
 
 import { View } from "@/components/Themed";
-import GameCanvas from "@/components/game/canvas";
+import Splashscreen from "@/components/game/splash";
 
 export default function TabOneScreen() {
   return (
     <View style={styles.container}>
-      <GameCanvas />
+      <Splashscreen />
     </View>
   );
 }
