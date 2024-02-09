@@ -6,7 +6,7 @@ import sortBy from "lodash.sortby";
  */
 
 type Position = [number, number];
-type GridItem = {
+export type GridItem = {
   id: string;
   type: number;
   pos: Position;

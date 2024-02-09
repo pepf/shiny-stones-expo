@@ -1,24 +1,25 @@
 import { View } from "@/components/Themed";
 import { Canvas } from "@react-three/fiber";
 import { StyleSheet } from "react-native";
-import Grid from "../components/game/lib/grid";
+import Grid, { GridItem } from "../components/game/lib/grid";
 import { useEffect, useRef, useState } from "react";
 import { Center } from "@react-three/drei";
+import Colors from "@/constants/Colors";
+import { Stone } from "../components/game/components/Stone";
+import useList from "react-use/lib/useList";
+import cloneDeep from "lodash.clonedeep";
 
-// TODO support various types, clicking etc.
-const Stone = (props) => {
-  const color = {};
-  return (
-    <mesh position={props.position}>
-      <boxGeometry attach="geometry" args={[0.5, 0.5]} />
-      <meshLambertMaterial color="gold" reflectivity={0.5} />
-    </mesh>
-  );
-};
+const theme = Colors["light"];
 
-const StoneGrid = ({ width, height }) => {
-  const gridInstance = useRef(null);
-  const [grid, setGrid] = useState(null);
+const GRID_SPACING = 0.1 as const;
+
+interface StoneGridProps {
+  width: number;
+  height: number;
+}
+const StoneGrid = ({ width, height }: StoneGridProps) => {
+  const gridInstance = useRef<Grid>(null);
+  const [grid, setGrid] = useState<GridItem[] | null>(null);
 
   useEffect(() => {
     gridInstance.current = new Grid(width, height);
@@ -30,21 +31,107 @@ const StoneGrid = ({ width, height }) => {
     };
   }, [width, height]);
 
+  const [swapStack, { push: swapStackPush, clear: swapStackClear }] =
+    useList<GridItem>([]);
+
+  useEffect(() => {
+    const gridModel = gridInstance.current;
+    if (!gridModel) return;
+    console.log("swapstack value: ", swapStack);
+    if (swapStack.length > 2) {
+      console.warn("sth went wrong, clearing stack");
+      swapStackClear();
+    }
+    if (swapStack.length === 2) {
+      try {
+        swapStackClear();
+        const beforeGrid = cloneDeep(gridModel._grid);
+        const gridAfterSwap = gridModel.swapPositions(
+          swapStack[0],
+          swapStack[1]
+        );
+        if (!gridAfterSwap) return;
+        setGrid(gridAfterSwap);
+        // Find out the matches
+        const matchA = gridModel.findMatchForField(swapStack[0].pos);
+        const matchB = gridModel.findMatchForField(swapStack[1].pos);
+
+        // @todo Swap back on no match, figure out hooks?
+        if (!matchA && !matchB) {
+          setTimeout(() => {
+            // console.log('no match, reverting..')
+            // console.log(swapStack)
+            // const revertGrid = gridModel.swapPositions(swapStack.value[1], swapStack.value[0])
+            console.log("no matches, reverting..");
+            setGrid(beforeGrid);
+          }, 250);
+          return () => {
+            console.log("stopping early because no match");
+          };
+        }
+
+        // Recursive function dealing with matches, filling the grid back up
+        // And dealing with matches resulting from that...
+        const processMatches = (matches: Array<GridItem[]> = []) => {
+          // Remove matches, push gems down
+          const gridWithoutMatches = matches.reduce((_grid, match) => {
+            if (!match) return _grid;
+            // if (match.length) setScore((prevScore) => prevScore + match.length * 10)
+            gridModel._grid = _grid.removeMatch(match);
+            return gridModel;
+          }, gridModel);
+
+          // Delay every step a bit so react-spring animations are visible
+          // There's probably a better way but this seems to work exactly right :)
+          setTimeout(() => {
+            setGrid(gridWithoutMatches._grid);
+            setTimeout(() => {
+              setGrid(gridModel.moveDown());
+              setTimeout(() => {
+                setGrid(gridModel.fill());
+                const chainMatches = gridModel.findAllMatches();
+                if (chainMatches.length > 0) {
+                  // Recurse here
+                  processMatches(chainMatches);
+                }
+              }, 200);
+            }, 200);
+          }, 200);
+        };
+
+        processMatches([matchA, matchB]);
+      } catch (e) {
+        console.warn(e.toString());
+        console.warn(e.stack);
+      }
+    }
+
+    return () => {
+      // console.log('dropping useEffect hook')
+    };
+  }, [swapStack, setGrid]);
+
   if (!grid) return null;
-  const spacing = 0.1;
 
   const gridComponent = grid.map((item) => {
     const [x, y] = item.pos;
+    const active = Boolean(
+      swapStack.find((stackItem) => stackItem && stackItem.id === item.id)
+    );
     return (
       <Stone
         key={item.id}
         type={item.type}
-        position={[x + x * spacing, y + y * spacing, 0]}
+        active={active}
+        position={[x + x * GRID_SPACING, y + y * GRID_SPACING, 0]}
+        onClick={() => {
+          swapStackPush(item);
+        }}
       />
     );
   });
 
-  return <Center>{gridComponent}</Center>;
+  return <Center position-z={-3}>{gridComponent}</Center>;
 };
 
 const Level = () => {
@@ -52,8 +139,8 @@ const Level = () => {
     <View style={styles.container}>
       <Canvas>
         <pointLight position-z={2} position-y={2} />
-        <color attach="background" args={["#ffb6c1"]} />
-        <StoneGrid width={4} height={4} />
+        <color attach="background" args={[theme.background]} />
+        <StoneGrid width={5} height={5} />
       </Canvas>
     </View>
   );
