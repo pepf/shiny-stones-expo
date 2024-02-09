@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { Canvas, MeshProps, useFrame } from "@react-three/fiber";
 import { StyleSheet, View } from "react-native";
-import { Center, SoftShadows, Text3D } from "@react-three/drei";
+import { Center, Text3D } from "@react-three/drei";
 import InterBoldFontData from "../../assets/fonts/interBold.json";
 import Colors from "@/constants/Colors";
 
@@ -55,7 +55,7 @@ function Logo() {
     <Center ref={mesh} rotation={[-0.25, -0.33, 0]}>
       <Text3D
         receiveShadow
-        curveSegments={32}
+        curveSegments={8}
         bevelEnabled
         bevelSize={0.04}
         bevelThickness={0.1}
@@ -76,7 +76,6 @@ const Splashscreen = () => {
   return (
     <View style={styles.container}>
       <Canvas shadows>
-        <SoftShadows size={25} samples={10} />
         <color attach="background" args={["#ffb6c1"]} />
         <ambientLight intensity={0.2} />
         <directionalLight
@@ -91,22 +90,23 @@ const Splashscreen = () => {
           />
         </directionalLight>
 
-        {/* <pointLight color="darkblue" position={[10, 10, 10]} /> */}
-        <SpinningBox position={[-1.2, 2, -1]} castShadow />
-        <SpinningBox position={[1.2, -2, 0]} castShadow />
+        <Suspense fallback={null}>
+          <SpinningBox position={[-1.2, 2, -1]} castShadow />
+          <SpinningBox position={[1.2, -2, 0]} castShadow />
 
-        <Logo />
+          <Logo />
 
-        <mesh
-          position-y={-2}
-          position-x={-1}
-          castShadow
-          receiveShadow
-          rotation-y={0.33}
-        >
-          <torusKnotGeometry args={[0.5, 0.2, 100, 16]} />
-          <meshLambertMaterial attach="material" color="gold" />
-        </mesh>
+          <mesh
+            position-y={-2}
+            position-x={-1}
+            castShadow
+            receiveShadow
+            rotation-y={0.33}
+          >
+            <torusKnotGeometry args={[0.5, 0.2, 100, 16]} />
+            <meshLambertMaterial attach="material" color="gold" />
+          </mesh>
+        </Suspense>
         <mesh
           rotation={[(-1 * Math.PI) / 2, 0, 0]}
           position={[0, -3, 0]}
