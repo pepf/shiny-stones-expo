@@ -19,8 +19,8 @@ class Grid {
   _width: number = 0;
   _height: number = 0;
 
-  MAX_DISTANCE = 1;
-  MATCH_LENGTH = 3;
+  MAX_DISTANCE = 1 as const;
+  MATCH_LENGTH = 3 as const;
 
   constructor(width: number, height: number) {
     this._width = width;
@@ -73,10 +73,9 @@ class Grid {
     const [x1, y1] = item1.pos;
     const [x2, y2] = item2.pos;
 
-    if (
-      Math.abs(x2 - x1) > this.MAX_DISTANCE ||
-      Math.abs(y2 - y1) > this.MAX_DISTANCE
-    ) {
+    const xDistance = Math.abs(x2 - x1);
+    const yDistance = Math.abs(y2 - y1);
+    if (xDistance > this.MAX_DISTANCE || yDistance > this.MAX_DISTANCE) {
       console.warn("too far away!");
       return;
     }
@@ -84,7 +83,10 @@ class Grid {
       console.warn("The same component!");
       return;
     }
-
+    if (xDistance > 0 && yDistance > 0) {
+      console.warn("Unswappable positions");
+      return;
+    }
     const index1 = grid.findIndex((item) => item.id === item1.id);
     const index2 = grid.findIndex((item) => item.id === item2.id);
     grid[index1].pos = [x2, y2];
