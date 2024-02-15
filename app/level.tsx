@@ -138,9 +138,14 @@ const Level = () => {
   return (
     <View style={styles.container}>
       <Canvas>
-        <pointLight position-z={2} position-y={2} />
+        <directionalLight
+          position-z={5}
+          position-y={2}
+          target-position={[0, 0, 0]}
+          intensity={0.75}
+        />
         <color attach="background" args={[theme.background]} />
-        <StoneGrid width={5} height={5} />
+        <StoneGrid width={5} height={8} />
       </Canvas>
     </View>
   );

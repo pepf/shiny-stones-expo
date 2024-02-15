@@ -29,13 +29,28 @@ export const Stone = (props: StoneProps) => {
   const color = colors[props.type];
 
   return (
-    <mesh
-      onClick={(e) => props.onClick(e, props.type)}
-      position={props.position}
-      scale={props.active ? 1.2 : 1.0}
-    >
-      <Geometry attach="geometry" args={[0.5, 0]} />
-      <meshLambertMaterial color={color} reflectivity={0.5} />
-    </mesh>
+    <group position={props.position}>
+      <mesh
+        onClick={(e) => props.onClick(e, props.type)}
+        scale={props.active ? 1.2 : 1.0}
+      >
+        <Geometry attach="geometry" args={[0.5, 0]} />
+        <meshLambertMaterial color={color} reflectivity={0.5} />
+      </mesh>
+      {props.active ? (
+        <>
+          <mesh position-z={-0.5}>
+            <ringGeometry attach="geometry" args={[0, 0.75, 32]} />
+            <meshLambertMaterial
+              color={"white"}
+              reflectivity={0}
+              emissive={"white"}
+              emissiveIntensity={5}
+            />
+          </mesh>
+          <pointLight position-z={1} color={color} />
+        </>
+      ) : null}
+    </group>
   );
 };
