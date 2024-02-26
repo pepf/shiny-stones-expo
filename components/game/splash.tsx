@@ -1,11 +1,9 @@
 import { Suspense, useRef, useState } from "react";
 import { Canvas, MeshProps, useFrame } from "@react-three/fiber";
 import { StyleSheet, View } from "react-native";
-import { Center, Text3D } from "@react-three/drei";
+import { Center, Environment, Text3D } from "@react-three/drei";
 import InterBoldFontData from "../../assets/fonts/interBold.json";
-import Colors from "@/constants/Colors";
-
-const SplashBGColor = Colors["light"].splashBackground;
+import { DoubleSide } from "three";
 
 function SpinningBox(props: MeshProps) {
   // This reference will give us direct access to the mesh
@@ -32,8 +30,10 @@ function SpinningBox(props: MeshProps) {
       onPointerOut={(e) => setHover(false)}
     >
       <boxGeometry attach="geometry" args={[1, 1, 1]} />
-      <meshLambertMaterial
-        reflectivity={0.1}
+      <meshPhysicalMaterial
+        roughness={0.2}
+        reflectivity={0.8}
+        metalness={1}
         attach="material"
         color={hovered ? "hotpink" : "#ffd0b6"}
       />
@@ -66,7 +66,12 @@ function Logo() {
         font={InterBoldFontData}
       >
         {`shiny\nstones`}
-        <meshLambertMaterial color="#ffb6e6" reflectivity={0.1} />
+        <meshPhysicalMaterial
+          roughness={0.2}
+          color="#efa7d6"
+          reflectivity={0.8}
+          metalness={1}
+        />
       </Text3D>
     </Center>
   );
@@ -81,7 +86,7 @@ const Splashscreen = () => {
         <directionalLight
           castShadow
           position={[0, 10, 4]}
-          intensity={1}
+          intensity={0}
           shadow-mapSize={1024}
         >
           <orthographicCamera
@@ -97,28 +102,54 @@ const Splashscreen = () => {
           <Logo />
 
           <mesh
-            position-y={-2}
-            position-x={-1}
+            position-y={0}
+            position-x={0.5}
+            scale={8}
             castShadow
             receiveShadow
-            rotation-y={0.33}
+            rotation-y={0.63}
           >
-            <torusKnotGeometry args={[0.5, 0.2, 100, 16]} />
-            <meshLambertMaterial attach="material" color="gold" />
+            <torusKnotGeometry args={[0.8, 0.1, 100, 16]} />
+            <meshPhysicalMaterial
+              attach="material"
+              color="gold"
+              metalness={0.1}
+              roughness={0.1}
+              reflectivity={0.1}
+            />
           </mesh>
         </Suspense>
-        <mesh
-          rotation={[(-1 * Math.PI) / 2, 0, 0]}
-          position={[0, -3, 0]}
-          receiveShadow
-        >
-          <planeGeometry attach="geometry" args={[10, 10]} />
-          <meshStandardMaterial attach="material" color={SplashBGColor} />
-        </mesh>
+
+        {/* We're building a cube-mapped environment declaratively.
+          Anything you put in here will be filmed (once) by a cubemap-camera
+          and applied to the scenes environment, and optionally background. 
+          This helps a lot with interesting refelecions on shiny objects */}
+        <Environment background resolution={64}>
+          <Striplight position={[5, 2, 10]} scale={[1, 3, 10]} />
+          <Striplight position={[0, 10, 10]} scale={[3, 1, 10]} />
+          <Striplight position={[-5, 0, 1]} scale={[1, 3, 10]} />
+          <Striplight position={[5, 0, 1]} scale={[1, 3, 10]} />
+          <Striplight position={[-5, 0, 10]} scale={[1, 3, 10]} />
+          <ambientLight intensity={0.4} />
+
+          <mesh scale={50}>
+            <sphereGeometry args={[1, 64, 64]} />
+            <meshBasicMaterial side={DoubleSide} color="#ffb6c1" />
+          </mesh>
+        </Environment>
       </Canvas>
     </View>
   );
 };
+
+function Striplight(props) {
+  return (
+    <mesh {...props}>
+      <boxGeometry />
+      <meshBasicMaterial color="white" />
+    </mesh>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
