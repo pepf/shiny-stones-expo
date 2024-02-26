@@ -1,4 +1,4 @@
-import Grid from "./grid";
+import Grid, { GridSwapErrorCode } from "./grid";
 
 function randomIntFromInterval(min: number, max: number) {
   // min and max included
@@ -37,32 +37,31 @@ describe("Grid tests", () => {
   });
 
   it("is able to check if elements line up vertically", () => {
-    const grid = new Grid(10, 11);
+    const gridHeight = 11;
+    const grid = new Grid(10, gridHeight);
     const length = randomIntFromInterval(3, 4);
-    const type = 1;
+    const type = 5;
     const startX = randomIntFromInterval(0, 5);
     const startY = 2;
-    for (let i = startY; i <= startY + length; i++) {
+    for (let i = 0; i < gridHeight; i++) {
       const item = grid.getItemAt([startX, i]);
       if (item) {
-        item.type = i === startY + length ? type + 1 : type;
+        item.type = i >= startY && i < startY + length ? type : type - 1;
 
         const itemNext = grid.getItemAt([startX + 1, i]);
         // prevent horizontal matches
         if (itemNext) {
-          itemNext.type = type + 1;
+          itemNext.type = type - 1;
         }
       }
     }
 
     const match = grid.findMatchForField([startX, startY]);
 
-    console.log(match);
     expect(match).toBeInstanceOf(Array);
     expect(match.length).toBe(length);
-    // @TODO fix flaky vertical match finding
     expect(grid.findMatchForField([startX, startY + 1])).toEqual(match);
-    // expect(grid.findMatchForField([startX, startY + 2])).toEqual(match)
+    expect(grid.findMatchForField([startX, startY + 2])).toEqual(match);
   });
 
   it("is able to check the whole grid for matches", () => {
@@ -87,7 +86,9 @@ describe("Grid tests", () => {
     const item0 = grid.getItemAt([0, 0]);
     const item1 = grid.getItemAt([1, 1]);
     if (item0 && item1) {
-      expect(grid.swapPositions(item0, item1)).toBeUndefined();
+      expect(() => grid.swapPositions(item0, item1)).toThrow(
+        GridSwapErrorCode.INVALID_POSITIONS
+      );
     }
   });
 });

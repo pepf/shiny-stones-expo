@@ -1,7 +1,7 @@
 import { View } from "@/components/Themed";
 import { Canvas } from "@react-three/fiber";
 import { StyleSheet } from "react-native";
-import Grid, { GridItem } from "../components/game/lib/grid";
+import Grid, { GridItem, GridSwapError } from "../components/game/lib/grid";
 import { useEffect, useRef, useState } from "react";
 import { Center } from "@react-three/drei";
 import Colors from "@/constants/Colors";
@@ -50,7 +50,7 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
           swapStack[0],
           swapStack[1]
         );
-        if (!gridAfterSwap) return;
+
         setGrid(gridAfterSwap);
         // Find out the matches
         const matchA = gridModel.findMatchForField(swapStack[0].pos);
@@ -100,7 +100,9 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
         };
 
         processMatches([matchA, matchB]);
-      } catch (e) {
+      } catch (e: unknown) {
+        // No need to log these expected errors
+        if (e instanceof GridSwapError) return;
         console.warn(e.toString());
         console.warn(e.stack);
       }

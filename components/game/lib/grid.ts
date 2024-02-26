@@ -12,6 +12,24 @@ export type GridItem = {
   pos: Position;
 };
 
+export enum GridSwapErrorCode {
+  TOO_FAR = "Too far!",
+  IDENTICAL_ITEMS = "Identical items",
+  INVALID_POSITIONS = "Invalid positions",
+}
+
+export class GridSwapError extends Error {
+  constructor(opts: GridSwapErrorCode) {
+    super(opts);
+    this.name = "GridSwapError";
+  }
+}
+
+enum Axis {
+  X,
+  Y,
+}
+
 class Grid {
   types = [0, 1, 2, 3, 4];
 
@@ -47,6 +65,9 @@ class Grid {
   get ArrayGrid(): GridItem[][] {
     return this.arrayGridFrom();
   }
+  _logArrayGrid() {
+    console.log(this.ArrayGrid.map((v) => v.map((i) => i.type).join("-")));
+  }
 
   private arrayGridFrom = (grid?: GridItem[]) => {
     grid = grid || this._grid;
@@ -68,6 +89,12 @@ class Grid {
     );
   }
 
+  /**
+   *
+   * @param item1 First selected GridItem
+   * @param item2 Second selected GridItem
+   * @returns the updated grid or throws a {@link GridSwapErrorCode}
+   */
   swapPositions(item1: GridItem, item2: GridItem) {
     const grid = cloneDeep(this._grid);
     const [x1, y1] = item1.pos;
@@ -76,16 +103,13 @@ class Grid {
     const xDistance = Math.abs(x2 - x1);
     const yDistance = Math.abs(y2 - y1);
     if (xDistance > this.MAX_DISTANCE || yDistance > this.MAX_DISTANCE) {
-      console.warn("too far away!");
-      return;
+      throw new GridSwapError(GridSwapErrorCode.INVALID_POSITIONS);
     }
     if (x1 === x2 && y1 === y2) {
-      console.warn("The same component!");
-      return;
+      throw new GridSwapError(GridSwapErrorCode.IDENTICAL_ITEMS);
     }
     if (xDistance > 0 && yDistance > 0) {
-      console.warn("Unswappable positions");
-      return;
+      throw new GridSwapError(GridSwapErrorCode.INVALID_POSITIONS);
     }
     const index1 = grid.findIndex((item) => item.id === item1.id);
     const index2 = grid.findIndex((item) => item.id === item2.id);
@@ -124,7 +148,7 @@ class Grid {
 
     let match: GridItem[] = [];
 
-    const checkNext = (incr: boolean, axis: "x" | "y") => {
+    const checkNext = (incr: boolean, axis: Axis) => {
       const recurseCheck = ([x, y]: Position) => {
         let item: GridItem;
         try {
@@ -138,8 +162,8 @@ class Grid {
           if (!match.find((m) => m.id === item.id)) {
             match.push(cloneDeep(item));
           }
-          const newX = axis === "x" ? (incr ? x + 1 : x - 1) : x;
-          const newY = axis === "y" ? (incr ? y + 1 : y - 1) : y;
+          const newX = axis === Axis.X ? (incr ? x + 1 : x - 1) : x;
+          const newY = axis === Axis.Y ? (incr ? y + 1 : y - 1) : y;
           recurseCheck([newX, newY]);
         }
         return;
@@ -147,11 +171,11 @@ class Grid {
       return recurseCheck;
     };
 
-    checkNext(true, "x")([x, y]);
-    checkNext(false, "x")([x, y]);
+    checkNext(true, Axis.X)([x, y]);
+    checkNext(false, Axis.X)([x, y]);
     if (match.length <= 1) {
-      checkNext(true, "y")([x, y]);
-      checkNext(false, "y")([x, y]);
+      checkNext(true, Axis.Y)([x, y]);
+      checkNext(false, Axis.Y)([x, y]);
     }
 
     // Only match if it contains more than MATCH_LENGTH gems
