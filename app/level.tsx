@@ -73,21 +73,17 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
         // Recursive function dealing with matches, filling the grid back up
         // And dealing with matches resulting from that...
         const processMatches = (matches: Array<GridItem[]> = []) => {
-          // Remove matches, push gems down
-          const gridWithoutMatches = matches.reduce((_grid, match) => {
-            if (!match) return _grid;
-            // if (match.length) setScore((prevScore) => prevScore + match.length * 10)
-            gridModel._grid = _grid.removeMatch(match);
-            return gridModel;
-          }, gridModel);
-
           // Delay every step a bit so react-spring animations are visible
           // There's probably a better way but this seems to work exactly right :)
           setTimeout(() => {
-            setGrid(gridWithoutMatches._grid);
+            // Remove matches
+            gridModel.removeMatches(matches);
+            setGrid(gridModel._grid);
             setTimeout(() => {
+              // Push grid down
               setGrid(gridModel.moveDown());
               setTimeout(() => {
+                // Refil blank spots
                 setGrid(gridModel.fill());
                 const chainMatches = gridModel.findAllMatches();
                 if (chainMatches.length > 0) {

@@ -5,7 +5,7 @@ function randomIntFromInterval(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-describe("Grid tests", () => {
+describe("The Grid class", () => {
   it("is able to create a structured array from a single dimension grid", () => {
     const grid = new Grid(10, 11);
     const [x, y] = grid._grid[6].pos;
@@ -90,5 +90,10 @@ describe("Grid tests", () => {
         GridSwapErrorCode.INVALID_POSITIONS
       );
     }
+  });
+
+  it("should not have visible matches (3+ stones in a row) in the initial state", () => {
+    const grid = new Grid(10, 10);
+    expect(grid.findAllMatches()).toHaveLength(0);
   });
 });

@@ -43,16 +43,34 @@ class Grid {
   constructor(width: number, height: number) {
     this._width = width;
     this._height = height;
+
+    // Fill the grid with random items
     this._grid = Array(width * height)
       .fill(null)
       .map((v, index) => {
         const indexX = index % width;
         const indexY = Math.floor(index / width);
-        return this._createItem(indexX, indexY);
+        return this.createItem(indexX, indexY);
       });
+
+    // After filling, remove all matches
+    const processMatches = (
+      matches: ReturnType<typeof this.findAllMatches>
+    ) => {
+      this.removeMatches(matches);
+      this.moveDown();
+      this.fill();
+      const newMatches = this.findAllMatches();
+      if (newMatches.length >= 1) {
+        processMatches(newMatches);
+      }
+    };
+
+    // Recursively find and remove matches until none are left.
+    processMatches(this.findAllMatches());
   }
 
-  _createItem(x: number, y: number): GridItem {
+  private createItem(x: number, y: number): GridItem {
     const type = Math.floor(Math.random() * this.types.length);
     const uuid = Math.floor(Math.random() * 1000000).toString();
     return {
@@ -186,11 +204,23 @@ class Grid {
     return null;
   }
 
+  // Returns a copy of the grid
   removeMatch(match: GridItem[]) {
     let grid = cloneDeep(this._grid);
     const ids = match.map((m) => m.id);
     grid = grid.filter((item) => !ids.includes(item.id));
     return grid;
+  }
+
+  // Modifies internal state
+  removeMatches(matches: Array<GridItem[]>) {
+    const gridWithoutMatches = matches.reduce((grid, match) => {
+      if (!match) return grid;
+      grid._grid = grid.removeMatch(match);
+      return grid;
+    }, this);
+
+    return gridWithoutMatches;
   }
 
   // Basically bubble sort, any ideas?
@@ -218,7 +248,7 @@ class Grid {
     while (cycle() === false) {
       i++;
     }
-    console.log("sorting took ", i, " cycles");
+    // console.log("sorting took ", i, " cycles");
     this._grid = grid;
     return grid;
   }
@@ -231,7 +261,7 @@ class Grid {
     const indexY = arrayGrid.length - 1;
     arrayGrid[indexY].forEach((item, indexX) => {
       for (let y = indexY; typeof arrayGrid[y]?.[indexX] === "undefined"; y--) {
-        const item = this._createItem(indexX, y);
+        const item = this.createItem(indexX, y);
         grid.push(item);
       }
     });
