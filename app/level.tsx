@@ -136,7 +136,7 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
 const Level = () => {
   return (
     <View style={styles.container}>
-      <Canvas shadows>
+      <Canvas>
         <StoneGrid width={5} height={8} />
         <CustomEnvironment />
       </Canvas>

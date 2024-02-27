@@ -35,7 +35,7 @@ export const Stone = (props: StoneProps) => {
         scale={props.active ? 1.2 : 1.0}
         rotation-y={props.active ? 5 : 1.0}
       >
-        <Geometry attach="geometry" args={[0.5, 0]} />
+        <Geometry args={[0.5, 0]} />
         <meshPhysicalMaterial
           color={color}
           roughness={0.1}
@@ -54,7 +54,6 @@ export const Stone = (props: StoneProps) => {
               emissiveIntensity={1}
             />
           </mesh>
-          <pointLight position-z={1} color={color} />
         </>
       ) : null}
     </group>

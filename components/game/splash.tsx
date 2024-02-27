@@ -1,17 +1,13 @@
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useRef } from "react";
 import { Canvas, MeshProps, useFrame } from "@react-three/fiber";
 import { StyleSheet, View } from "react-native";
 import { Center, Text3D } from "@react-three/drei";
 import InterBoldFontData from "../../assets/fonts/interBold.json";
 import CustomEnvironment from "./components/CustomEnvironment";
 
-function SpinningBox(props: MeshProps) {
+function SpinningStone(props: MeshProps) {
   // This reference will give us direct access to the mesh
   const mesh = useRef<MeshProps>();
-
-  // Set up state for the hovered and active state
-  const [hovered, setHover] = useState(false);
-  const [active, setActive] = useState(false);
 
   // Rotate mesh every frame, this is outside of React without overhead
   useFrame(() => {
@@ -21,22 +17,9 @@ function SpinningBox(props: MeshProps) {
   });
 
   return (
-    <mesh
-      {...props}
-      ref={mesh}
-      scale={active ? [1.5, 1.5, 1.5] : [1, 1, 1]}
-      onClick={(e) => setActive(!active)}
-      onPointerOver={(e) => setHover(true)}
-      onPointerOut={(e) => setHover(false)}
-    >
-      <boxGeometry attach="geometry" args={[1, 1, 1]} />
-      <meshPhysicalMaterial
-        roughness={0.2}
-        reflectivity={0.8}
-        metalness={1}
-        attach="material"
-        color={hovered ? "hotpink" : "#ffd0b6"}
-      />
+    <mesh {...props} ref={mesh}>
+      <icosahedronGeometry attach="geometry" args={[0.75, 0]} />
+      <meshPhysicalMaterial roughness={0.2} metalness={0.5} color={"#ffd0b6"} />
     </mesh>
   );
 }
@@ -44,9 +27,8 @@ function SpinningBox(props: MeshProps) {
 function Logo() {
   const mesh = useRef<MeshProps>();
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     if (mesh && mesh.current) {
-      // console.log({ delta, state });
       mesh.current.rotation.y = 0.25 * Math.sin(state.clock.getElapsedTime());
     }
   });
@@ -84,8 +66,8 @@ const Splashscreen = () => {
         <ambientLight intensity={0.2} />
 
         <Suspense fallback={null}>
-          <SpinningBox position={[-1.2, 2, -1]} castShadow />
-          <SpinningBox position={[1.2, -2, 0]} castShadow />
+          <SpinningStone position={[-1.2, 2, -1]} castShadow />
+          <SpinningStone position={[1.2, -2, 0]} castShadow />
 
           <Logo />
 
@@ -93,7 +75,6 @@ const Splashscreen = () => {
             position-y={0}
             position-x={0.5}
             scale={8}
-            castShadow
             receiveShadow
             rotation-y={0.63}
           >

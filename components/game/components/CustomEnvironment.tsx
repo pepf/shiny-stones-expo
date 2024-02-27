@@ -8,7 +8,7 @@ import { DoubleSide } from "three";
  * and applied to the scenes environment, and optionally background.
  * This helps a lot with interesting refelecions on shiny objects
  */
-const CustomEnvironment = () => (
+const CustomEnvironment = ({ color = "#ffb6c1" }) => (
   <Environment background resolution={64}>
     <Striplight position={[5, 2, 10]} scale={[1, 3, 10]} />
     <Striplight position={[0, 10, 10]} scale={[3, 1, 10]} />
@@ -19,7 +19,7 @@ const CustomEnvironment = () => (
 
     <mesh scale={50}>
       <sphereGeometry args={[1, 64, 64]} />
-      <meshBasicMaterial side={DoubleSide} color="#ffb6c1" />
+      <meshBasicMaterial side={DoubleSide} color={color} />
     </mesh>
   </Environment>
 );
