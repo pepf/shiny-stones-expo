@@ -81,19 +81,7 @@ const Splashscreen = () => {
   return (
     <View style={styles.container}>
       <Canvas shadows>
-        <color attach="background" args={["#ffb6c1"]} />
         <ambientLight intensity={0.2} />
-        <directionalLight
-          castShadow
-          position={[0, 10, 4]}
-          intensity={0}
-          shadow-mapSize={1024}
-        >
-          <orthographicCamera
-            attach="shadow-camera"
-            args={[-10, 10, -10, 10, 0.1, 50]}
-          />
-        </directionalLight>
 
         <Suspense fallback={null}>
           <SpinningBox position={[-1.2, 2, -1]} castShadow />

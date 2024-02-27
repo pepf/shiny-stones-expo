@@ -8,6 +8,7 @@ import Colors from "@/constants/Colors";
 import { Stone } from "../components/game/components/Stone";
 import useList from "react-use/lib/useList";
 import cloneDeep from "lodash.clonedeep";
+import CustomEnvironment from "@/components/game/components/CustomEnvironment";
 
 const theme = Colors["light"];
 
@@ -135,15 +136,9 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
 const Level = () => {
   return (
     <View style={styles.container}>
-      <Canvas>
-        <directionalLight
-          position-z={5}
-          position-y={2}
-          target-position={[0, 0, 0]}
-          intensity={0.75}
-        />
-        <color attach="background" args={[theme.background]} />
+      <Canvas shadows>
         <StoneGrid width={5} height={8} />
+        <CustomEnvironment />
       </Canvas>
     </View>
   );
