@@ -1,9 +1,9 @@
 import { Suspense, useRef, useState } from "react";
 import { Canvas, MeshProps, useFrame } from "@react-three/fiber";
 import { StyleSheet, View } from "react-native";
-import { Center, Environment, Text3D } from "@react-three/drei";
+import { Center, Text3D } from "@react-three/drei";
 import InterBoldFontData from "../../assets/fonts/interBold.json";
-import { DoubleSide } from "three";
+import CustomEnvironment from "./components/CustomEnvironment";
 
 function SpinningBox(props: MeshProps) {
   // This reference will give us direct access to the mesh
@@ -120,36 +120,11 @@ const Splashscreen = () => {
           </mesh>
         </Suspense>
 
-        {/* We're building a cube-mapped environment declaratively.
-          Anything you put in here will be filmed (once) by a cubemap-camera
-          and applied to the scenes environment, and optionally background. 
-          This helps a lot with interesting refelecions on shiny objects */}
-        <Environment background resolution={64}>
-          <Striplight position={[5, 2, 10]} scale={[1, 3, 10]} />
-          <Striplight position={[0, 10, 10]} scale={[3, 1, 10]} />
-          <Striplight position={[-5, 0, 1]} scale={[1, 3, 10]} />
-          <Striplight position={[5, 0, 1]} scale={[1, 3, 10]} />
-          <Striplight position={[-5, 0, 10]} scale={[1, 3, 10]} />
-          <ambientLight intensity={0.4} />
-
-          <mesh scale={50}>
-            <sphereGeometry args={[1, 64, 64]} />
-            <meshBasicMaterial side={DoubleSide} color="#ffb6c1" />
-          </mesh>
-        </Environment>
+        <CustomEnvironment />
       </Canvas>
     </View>
   );
 };
-
-function Striplight(props) {
-  return (
-    <mesh {...props}>
-      <boxGeometry />
-      <meshBasicMaterial color="white" />
-    </mesh>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
