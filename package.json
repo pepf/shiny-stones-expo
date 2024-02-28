@@ -15,6 +15,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
     "@react-navigation/native": "^6.0.2",
+    "@react-spring/three": "^9.7.3",
     "@react-three/drei": "^9.97.1",
     "@react-three/fiber": "^8.3.1",
     "expo": "~50.0.6",

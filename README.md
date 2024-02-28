@@ -13,7 +13,6 @@ The codebase is generated from an expo template, and is still completely compati
 
 
 ## Todo
-- Figure out smooth animations in react-native. I suspect react-spring might not work. Reanimated might work, but might be complicated because of the dynamic animations
 - Scoring (incl combo bonusses)
 - More gameplay elements, e.g. level with time limit, level with limited amount of moves or level where user needs to reach a certain score.
 - Graphical improvements are done, uses dynamically generated environment maps to provide nice lightning. Improvements can be done by having some levels have different lightning or color schemes compared to others.

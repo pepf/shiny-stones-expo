@@ -1,40 +1,42 @@
-import { Suspense, useRef } from "react";
-import { Canvas, MeshProps, useFrame } from "@react-three/fiber";
+import { Suspense, useState } from "react";
+import { Canvas, MeshProps } from "@react-three/fiber";
 import { StyleSheet, View } from "react-native";
 import { Center, Text3D } from "@react-three/drei";
 import InterBoldFontData from "../../assets/fonts/interBold.json";
 import CustomEnvironment from "./components/CustomEnvironment";
+import { useSpring, a, animated } from "@react-spring/three";
 
 function SpinningStone(props: MeshProps) {
-  // This reference will give us direct access to the mesh
-  const mesh = useRef<MeshProps>();
-
-  // Rotate mesh every frame, this is outside of React without overhead
-  useFrame(() => {
-    if (mesh && mesh.current) {
-      mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
-    }
-  });
+  const [active, setActive] = useState(false);
+  const { scale } = useSpring({ scale: active ? 1.5 : 1 });
 
   return (
-    <mesh {...props} ref={mesh}>
+    <a.mesh {...props} onClick={() => setActive(!active)} scale={scale}>
       <icosahedronGeometry attach="geometry" args={[0.75, 0]} />
       <meshPhysicalMaterial roughness={0.2} metalness={0.5} color={"#ffd0b6"} />
-    </mesh>
+    </a.mesh>
   );
 }
 
+const AnimatedCenter = animated(Center);
 function Logo() {
-  const mesh = useRef<MeshProps>();
-
-  useFrame((state) => {
-    if (mesh && mesh.current) {
-      mesh.current.rotation.y = 0.25 * Math.sin(state.clock.getElapsedTime());
-    }
+  const startRotation = [-0.25, -0.5, 0];
+  const props = useSpring({
+    from: { rotation: startRotation },
+    to: [{ rotation: [-0.25, 0.5, 0] }, { rotation: startRotation }],
+    loop: true,
+    // https://react-spring.dev/docs/advanced/config#presets
+    config: {
+      mass: 200,
+      tension: 100,
+      friction: 200,
+      clamp: true,
+      velocity: 0,
+    },
   });
 
   return (
-    <Center ref={mesh} rotation={[-0.25, -0.33, 0]}>
+    <AnimatedCenter {...props}>
       <Text3D
         receiveShadow
         curveSegments={8}
@@ -55,7 +57,7 @@ function Logo() {
           metalness={1}
         />
       </Text3D>
-    </Center>
+    </AnimatedCenter>
   );
 }
 
