@@ -7,7 +7,6 @@ import { Center } from "@react-three/drei";
 import Colors from "@/constants/Colors";
 import { Stone } from "../components/game/components/Stone";
 import useList from "react-use/lib/useList";
-import cloneDeep from "lodash.clonedeep";
 import CustomEnvironment from "@/components/game/components/CustomEnvironment";
 
 const theme = Colors["light"];
@@ -46,8 +45,7 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
     if (swapStack.length === 2) {
       try {
         swapStackClear();
-        const beforeGrid = cloneDeep(gridModel._grid);
-        const gridAfterSwap = gridModel.swapPositions(
+        const [gridAfterSwap, revertSwap] = gridModel.swapPositions(
           swapStack[0],
           swapStack[1]
         );
@@ -60,15 +58,9 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
         // @todo Swap back on no match, figure out hooks?
         if (!matchA && !matchB) {
           setTimeout(() => {
-            // console.log('no match, reverting..')
-            // console.log(swapStack)
-            // const revertGrid = gridModel.swapPositions(swapStack.value[1], swapStack.value[0])
             console.log("no matches, reverting..");
-            setGrid(beforeGrid);
-          }, 250);
-          return () => {
-            console.log("stopping early because no match");
-          };
+            setGrid(revertSwap());
+          }, 100);
         }
 
         // Recursive function dealing with matches, filling the grid back up

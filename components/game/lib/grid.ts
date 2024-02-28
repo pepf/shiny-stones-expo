@@ -113,7 +113,10 @@ class Grid {
    * @param item2 Second selected GridItem
    * @returns the updated grid or throws a {@link GridSwapErrorCode}
    */
-  swapPositions(item1: GridItem, item2: GridItem) {
+  swapPositions(
+    item1: GridItem,
+    item2: GridItem
+  ): [GridItem[], () => GridItem[]] {
     const grid = cloneDeep(this._grid);
     const [x1, y1] = item1.pos;
     const [x2, y2] = item2.pos;
@@ -135,7 +138,19 @@ class Grid {
     grid[index2].pos = [x1, y1];
     console.log("swapped ", [x2, y2], "with", [x1, y1]);
     this._grid = grid;
-    return grid;
+
+    /**
+     * Function to revert this swap.
+     * Could be extended to a more extensive "log" of moves, but not needed right now.
+     */
+    const revertSwap = () => {
+      console.log("reverted swap");
+      grid[index1].pos = [x1, y1];
+      grid[index2].pos = [x2, y2];
+      this._grid = grid;
+      return grid;
+    };
+    return [grid, revertSwap];
   }
 
   findAllMatches(): Array<GridItem[]> {
