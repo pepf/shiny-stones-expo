@@ -16,8 +16,15 @@ interface StoneProps {
   type: 0 | 1 | 2 | 3 | 4;
   position: [number, number, number];
   active: boolean;
+  removed: boolean;
   onClick: (e: ThreeEvent<MouseEvent>, type: StoneProps["type"]) => void;
 }
+
+const scales = {
+  normal: [1, 1, 1],
+  active: [1.2, 1.2, 1.2],
+  removed: [0, 0, 0],
+} as const;
 
 /**
  * Single "stone" layed out in a grid. Should be able to support a number of "types",
@@ -30,10 +37,19 @@ export const Stone = (props: StoneProps) => {
   );
   const color = colors[props.type];
 
+  const scale = props.active
+    ? scales.active
+    : props.removed
+    ? scales.removed
+    : scales.normal;
   // animate all state changes
-  const { position, scale, rotation } = useSpring({
+  const {
+    position,
+    scale: scaleSpring,
+    rotation,
+  } = useSpring({
+    scale,
     position: props.position,
-    scale: props.active ? [1.2, 1.2, 1.2] : [1, 1, 1],
     rotation: props.active ? MathUtils.degToRad(90) : 0,
   });
 
@@ -41,7 +57,7 @@ export const Stone = (props: StoneProps) => {
     <a.group position={position}>
       <a.mesh
         onClick={(e) => props.onClick(e, props.type)}
-        scale={scale}
+        scale={scaleSpring}
         rotation-y={rotation}
       >
         <Geometry args={[0.5, 0]} />

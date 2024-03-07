@@ -4,12 +4,9 @@ import { StyleSheet } from "react-native";
 import Grid, { GridItem, GridSwapError } from "../components/game/lib/grid";
 import { useEffect, useRef, useState } from "react";
 import { Center } from "@react-three/drei";
-import Colors from "@/constants/Colors";
 import { Stone } from "../components/game/components/Stone";
 import useList from "react-use/lib/useList";
 import CustomEnvironment from "@/components/game/components/CustomEnvironment";
-
-const theme = Colors["light"];
 
 const GRID_SPACING = 0.1 as const;
 
@@ -32,6 +29,8 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
   }, [width, height]);
 
   const [swapStack, { push: swapStackPush, clear: swapStackClear }] =
+    useList<GridItem>([]);
+  const [removeStack, { push: removeStackPush, clear: removeStackClear }] =
     useList<GridItem>([]);
 
   useEffect(() => {
@@ -66,9 +65,17 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
         // Recursive function dealing with matches, filling the grid back up
         // And dealing with matches resulting from that...
         const processMatches = (matches: Array<GridItem[]> = []) => {
+          // Mark matched GridItems in a special list so we can animate them right before
+          // removing them from the grid
+          // @note Maybe only for the first match, not consecutive chained matches?
+          matches.forEach((match) => {
+            removeStackPush(...match);
+          });
+
           // Delay every step a bit so react-spring animations are visible
           // There's probably a better way but this seems to work exactly right :)
           setTimeout(() => {
+            removeStackClear();
             // Remove matches
             gridModel.removeMatches(matches);
             setGrid(gridModel._grid);
@@ -88,7 +95,11 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
           }, 200);
         };
 
-        processMatches([matchA, matchB]);
+        processMatches(
+          [matchA, matchB].filter(Boolean) as
+            | [GridItem[]]
+            | [GridItem[], GridItem[]]
+        );
       } catch (e: unknown) {
         // No need to log these expected errors
         if (e instanceof GridSwapError) return;
@@ -106,14 +117,18 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
 
   const gridComponent = grid.map((item) => {
     const [x, y] = item.pos;
-    const active = Boolean(
+    const isSelectedForSwapping = Boolean(
       swapStack.find((stackItem) => stackItem && stackItem.id === item.id)
+    );
+    const isMarkedForRemoval = Boolean(
+      removeStack.find((stackItem) => stackItem && stackItem.id === item.id)
     );
     return (
       <Stone
         key={item.id}
         type={item.type}
-        active={active}
+        active={isSelectedForSwapping}
+        removed={isMarkedForRemoval}
         position={[x + x * GRID_SPACING, y + y * GRID_SPACING, 0]}
         onClick={() => {
           swapStackPush(item);

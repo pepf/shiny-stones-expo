@@ -174,7 +174,7 @@ class Grid {
     return matches;
   }
 
-  findMatchForField([x, y]: Position): GridItem[] {
+  findMatchForField([x, y]: Position): GridItem[] | null {
     const grid = this.ArrayGrid;
     const item = grid[y][x];
     const { type } = item;
