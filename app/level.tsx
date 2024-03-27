@@ -1,21 +1,35 @@
 import { View } from "@/components/Themed";
 import { Canvas } from "@react-three/fiber";
 import { StyleSheet } from "react-native";
-import Grid, { GridItem, GridSwapError } from "../components/game/lib/grid";
+import Grid, {
+  GridItem,
+  GridSwapError,
+  Match,
+} from "../components/game/lib/grid";
 import { useEffect, useRef, useState } from "react";
 import { Center } from "@react-three/drei";
 import { Stone } from "../components/game/components/Stone";
-import useList from "react-use/lib/useList";
+import Score from "@/components/game/components/Score";
 import CustomEnvironment from "@/components/game/components/CustomEnvironment";
+import useList from "react-use/lib/useList";
+import LevelRuleEngine from "@/components/game/lib/score";
 
 const GRID_SPACING = 0.1 as const;
 
 interface StoneGridProps {
   width: number;
   height: number;
+  updateScore: React.Dispatch<React.SetStateAction<number>>;
+  updateMultiplier: React.Dispatch<React.SetStateAction<number>>;
 }
-const StoneGrid = ({ width, height }: StoneGridProps) => {
+const StoneGrid = ({
+  width,
+  height,
+  updateScore,
+  updateMultiplier,
+}: StoneGridProps) => {
   const gridInstance = useRef<Grid>(null);
+  const levelRuleInstance = useRef<LevelRuleEngine>(new LevelRuleEngine());
   const [grid, setGrid] = useState<GridItem[] | null>(null);
 
   useEffect(() => {
@@ -64,12 +78,19 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
 
         // Recursive function dealing with matches, filling the grid back up
         // And dealing with matches resulting from that...
-        const processMatches = (matches: Array<GridItem[]> = []) => {
+        const processMatches = (matches: Match[] = []) => {
+          levelRuleInstance.current.incrementComboMultiplier();
+          updateMultiplier(levelRuleInstance.current.currentMultiplier);
           // Mark matched GridItems in a special list so we can animate them right before
           // removing them from the grid
           // @note Maybe only for the first match, not consecutive chained matches?
           matches.forEach((match) => {
             removeStackPush(...match);
+
+            // Updates scores
+            const matchScore =
+              levelRuleInstance.current.calculateScoreFromMatch(match);
+            updateScore((oldScore: number) => oldScore + matchScore);
           });
 
           // Delay every step a bit so react-spring animations are visible
@@ -78,6 +99,7 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
             removeStackClear();
             // Remove matches
             gridModel.removeMatches(matches);
+
             setGrid(gridModel._grid);
             setTimeout(() => {
               // Push grid down
@@ -89,6 +111,10 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
                 if (chainMatches.length > 0) {
                   // Recurse here
                   processMatches(chainMatches);
+                } else {
+                  // We're done here, reset combo multiplier
+                  levelRuleInstance.current.resetComboMultiplier();
+                  updateMultiplier(levelRuleInstance.current.currentMultiplier);
                 }
               }, 200);
             }, 200);
@@ -141,10 +167,19 @@ const StoneGrid = ({ width, height }: StoneGridProps) => {
 };
 
 const Level = () => {
+  // Move to context or similar if it works as expected
+  const [score, setScore] = useState(0);
+  const [multiplier, setMultiplier] = useState(0);
   return (
     <View style={styles.container}>
+      <Score value={score} multiplier={multiplier} />
       <Canvas>
-        <StoneGrid width={5} height={8} />
+        <StoneGrid
+          width={5}
+          height={8}
+          updateScore={setScore}
+          updateMultiplier={setMultiplier}
+        />
         <CustomEnvironment />
       </Canvas>
     </View>
