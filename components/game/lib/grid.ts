@@ -30,6 +30,11 @@ enum Axis {
   Y,
 }
 
+/**
+ * A "match" is a list of GridItems
+ */
+export type Match = GridItem[];
+
 class Grid {
   types = [0, 1, 2, 3, 4];
 
@@ -153,9 +158,9 @@ class Grid {
     return [grid, revertSwap];
   }
 
-  findAllMatches(): Array<GridItem[]> {
+  findAllMatches(): Match[] {
     const marked: Array<String> = [];
-    const matches = this._grid.reduce((prev: Array<GridItem[]>, gridItem) => {
+    const matches = this._grid.reduce((prev: Match[], gridItem) => {
       // if this is already part of another match, skip
       if (marked.includes(gridItem.id)) return prev;
 
@@ -174,12 +179,12 @@ class Grid {
     return matches;
   }
 
-  findMatchForField([x, y]: Position): GridItem[] | null {
+  findMatchForField([x, y]: Position): Match | null {
     const grid = this.ArrayGrid;
     const item = grid[y][x];
     const { type } = item;
 
-    let match: GridItem[] = [];
+    let match: Match = [];
 
     const checkNext = (incr: boolean, axis: Axis) => {
       const recurseCheck = ([x, y]: Position) => {
@@ -220,7 +225,7 @@ class Grid {
   }
 
   // Returns a copy of the grid
-  removeMatch(match: GridItem[]) {
+  removeMatch(match: Match) {
     let grid = cloneDeep(this._grid);
     const ids = match.map((m) => m.id);
     grid = grid.filter((item) => !ids.includes(item.id));
@@ -228,7 +233,7 @@ class Grid {
   }
 
   // Modifies internal state
-  removeMatches(matches: Array<GridItem[]>) {
+  removeMatches(matches: Array<Match>) {
     const gridWithoutMatches = matches.reduce((grid, match) => {
       if (!match) return grid;
       grid._grid = grid.removeMatch(match);
@@ -239,7 +244,7 @@ class Grid {
   }
 
   // Basically bubble sort, any ideas?
-  moveDown(): GridItem[] {
+  moveDown(): Match {
     let grid = cloneDeep(this._grid);
     const cycle = () => {
       const arrayGrid = this.arrayGridFrom(grid);
@@ -269,7 +274,7 @@ class Grid {
   }
 
   /** Iterate over top row, figure out how much to add per column  */
-  fill(): GridItem[] {
+  fill(): Match {
     let grid = cloneDeep(this._grid);
     const arrayGrid = this.arrayGridFrom(grid);
 
