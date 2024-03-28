@@ -4,6 +4,28 @@ import { ThreeEvent } from "@react-three/fiber";
 import { useSpring, a } from "@react-spring/three";
 import { useTexture } from "@react-three/drei";
 
+import { Asset } from "expo-asset";
+
+let assetUrls: string[] = [];
+
+/**
+ * Native only: Load the images that will be used as textures, before we can actually use them inside
+ * `useTexture()`
+ */
+const loadAssets = async () => {
+  // Create an Asset from a resource
+  const assets = await Asset.loadAsync([
+    require("../../../assets/textures/Stone_texture_0.png"),
+    require("../../../assets/textures/Stone_texture_1.png"),
+    require("../../../assets/textures/Stone_texture_2.png"),
+    require("../../../assets/textures/Stone_texture_3.png"),
+    require("../../../assets/textures/Stone_texture_4.png"),
+  ]);
+
+  assetUrls = assets.map((asset) => asset.localUri as string);
+};
+loadAssets();
+
 const colors = ["#730943", "#A444A6", "#21BFA2", "#D92D07", "#F2E422"] as const;
 
 const geometries = [
@@ -34,21 +56,12 @@ const scales = {
  */
 export const Stone = (props: StoneProps) => {
   // this is probably not efficient
-  const maps = useTexture(
-    [
-      "../../assets/textures/Stone_texture_0.png",
-      "../../assets/textures/Stone_texture_1.png",
-      "../../assets/textures/Stone_texture_2.png",
-      "../../assets/textures/Stone_texture_3.png",
-      "../../assets/textures/Stone_texture_4.png",
-    ],
-    (textures) => {
-      textures.forEach((t) => {
-        t.repeat.set(1, 2);
-        t.offset.set(0, -0.6);
-      });
-    }
-  );
+  const maps = useTexture(assetUrls, (textures) => {
+    textures.forEach((t) => {
+      t.repeat.set(1, 2);
+      t.offset.set(0, -0.6);
+    });
+  });
 
   const Geometry = useMemo(
     () => `${geometries[props.type]}Geometry`,
