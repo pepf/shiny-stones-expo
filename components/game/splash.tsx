@@ -6,6 +6,8 @@ import InterBoldFontData from "../../assets/fonts/interBold.json";
 import CustomEnvironment from "./components/CustomEnvironment";
 import { useSpring, a, animated } from "@react-spring/three";
 
+const AnimatedCenter = animated(Center);
+
 function SpinningStone(props: MeshProps) {
   const [active, setActive] = useState(false);
   const { scale } = useSpring({ scale: active ? 1.5 : 1 });
@@ -18,7 +20,6 @@ function SpinningStone(props: MeshProps) {
   );
 }
 
-const AnimatedCenter = animated(Center);
 function Logo() {
   const startRotation = [-0.25, -0.5, 0];
   const props = useSpring({
@@ -62,6 +63,21 @@ function Logo() {
 }
 
 const Splashscreen = () => {
+  const startRotation = [0, 0.63, 0];
+  const props = useSpring({
+    from: { rotation: startRotation },
+    to: [{ rotation: [0, -1, 0] }, { rotation: startRotation }],
+    loop: true,
+    // https://react-spring.dev/docs/advanced/config#presets
+    config: {
+      mass: 1000,
+      tension: 100,
+      friction: 500,
+      clamp: true,
+      velocity: 0,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <Canvas shadows>
@@ -73,12 +89,12 @@ const Splashscreen = () => {
 
           <Logo />
 
-          <mesh
-            position-y={0}
+          <a.mesh
+            position-y={0.2}
             position-x={0.5}
             scale={8}
             receiveShadow
-            rotation-y={0.63}
+            {...props}
           >
             <torusKnotGeometry args={[0.8, 0.1, 100, 16]} />
             <meshPhysicalMaterial
@@ -88,7 +104,7 @@ const Splashscreen = () => {
               roughness={0.1}
               reflectivity={0.1}
             />
-          </mesh>
+          </a.mesh>
         </Suspense>
 
         <CustomEnvironment />

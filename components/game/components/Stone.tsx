@@ -2,8 +2,10 @@ import { useMemo } from "react";
 import { MathUtils } from "three";
 import { ThreeEvent } from "@react-three/fiber";
 import { useSpring, a } from "@react-spring/three";
+import { useTexture } from "@react-three/drei";
 
 const colors = ["#730943", "#A444A6", "#21BFA2", "#D92D07", "#F2E422"] as const;
+
 const geometries = [
   "octahedron",
   "icosahedron",
@@ -31,6 +33,23 @@ const scales = {
  * mapped to different appearances.
  */
 export const Stone = (props: StoneProps) => {
+  // this is probably not efficient
+  const maps = useTexture(
+    [
+      "../../assets/textures/Stone_texture_0.png",
+      "../../assets/textures/Stone_texture_1.png",
+      "../../assets/textures/Stone_texture_2.png",
+      "../../assets/textures/Stone_texture_3.png",
+      "../../assets/textures/Stone_texture_4.png",
+    ],
+    (textures) => {
+      textures.forEach((t) => {
+        t.repeat.set(1, 2);
+        t.offset.set(0, -0.6);
+      });
+    }
+  );
+
   const Geometry = useMemo(
     () => `${geometries[props.type]}Geometry`,
     [props.type]
@@ -62,7 +81,8 @@ export const Stone = (props: StoneProps) => {
       >
         <Geometry args={[0.5, 0]} />
         <meshPhysicalMaterial
-          color={color}
+          map={maps[props.type]}
+          color={undefined}
           roughness={0.1}
           metalness={0.5}
           reflectivity={0.5}
