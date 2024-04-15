@@ -1,6 +1,6 @@
 import { Text, View } from "@/components/Themed";
 import { animated, useSpring } from "@react-spring/three";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 const AnimatedScore = animated(Text);
 
@@ -15,11 +15,15 @@ const Score = ({ value, multiplier }: ScoreProps) => {
       <AnimatedScore style={styles.text}>
         {props.score.to((v) => `Score: ${Math.floor(v)}`)}
       </AnimatedScore>
-      {multiplier > 1 ? (
-        <Text style={[styles.text, styles.textCircle]}>
-          {multiplier.toString()}x
-        </Text>
-      ) : null}
+      <Text
+        style={[
+          styles.text,
+          styles.textCircle,
+          multiplier > 1 ? styles.visible : null,
+        ]}
+      >
+        {multiplier.toString()}x
+      </Text>
     </View>
   );
 };
@@ -32,6 +36,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 8,
+    paddingTop: Platform.OS !== "web" ? 48 : 0, // use `useHeaderHeight`
     backgroundColor: "rgba(0, 0, 0, 0.04)",
     display: "flex",
     flexDirection: "row",
@@ -44,10 +49,15 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   textCircle: {
+    opacity: 0, // invisible
+    position: "relative",
     padding: 8,
     fontSize: 21,
     borderRadius: 25,
     backgroundColor: "#ffb6c1",
+  },
+  visible: {
+    opacity: 1,
   },
 });
 
