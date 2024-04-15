@@ -10,7 +10,7 @@ const GRID_SPACING = 0.1 as const;
 interface StoneGridProps {
   width: number;
   height: number;
-  cameraZ: number;
+  cameraZ?: number;
   updateScore: React.Dispatch<React.SetStateAction<number>>;
   updateMultiplier: React.Dispatch<React.SetStateAction<number>>;
 }
