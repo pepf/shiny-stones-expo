@@ -7,11 +7,10 @@ import CustomEnvironment from "@/components/game/components/CustomEnvironment";
 import { StoneGrid } from "../components/game/components/StoneGrid";
 
 /**
- * Should only contain the parts of a level that distinguishes it from others.
- * For example override scoring logic, allow to limit the nr of moves, or override
- * visual appearance of gems.
+ * Example of how to support multiple levels with different "finishing" behavior.
+ * Or grid size, in this case 8 * 10 grid.
  */
-const Level = () => {
+const Level2 = () => {
   // Move to context or similar if it works as expected
   const [score, setScore] = useState(0);
   const [multiplier, setMultiplier] = useState(0);
@@ -20,8 +19,10 @@ const Level = () => {
       <Score value={score} multiplier={multiplier} />
       <Canvas>
         <StoneGrid
-          width={5}
-          height={8}
+          width={8}
+          height={10}
+          //
+          cameraZ={-7}
           updateScore={setScore}
           updateMultiplier={setMultiplier}
         />
@@ -38,4 +39,4 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 });
-export default Level;
+export default Level2;
